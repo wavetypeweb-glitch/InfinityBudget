@@ -1,0 +1,2940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0F172A" />
+  <title>InfinityBudget</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7C3AED",
+            ink: "#0F172A",
+            surface: "#1E293B",
+            success: "#22C55E",
+            danger: "#EF4444",
+            text: "#F8FAFC",
+            muted: "#94A3B8"
+          },
+          fontFamily: {
+            heading: ["Poppins", "Inter", "sans-serif"],
+            body: ["Inter", "sans-serif"],
+            money: ["Space Grotesk", "Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-soft: rgba(124, 58, 237, 0.22);
+      --bg: #0F172A;
+      --bg-deep: #070B14;
+      --card: #1E293B;
+      --card-soft: rgba(30, 41, 59, 0.74);
+      --line: rgba(148, 163, 184, 0.16);
+      --line-strong: rgba(248, 250, 252, 0.12);
+      --success: #22C55E;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --cyan: #06B6D4;
+      --rose: #F43F5E;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --muted-soft: rgba(148, 163, 184, 0.7);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.96) 52%, #070B14 100%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 22px);
+      font-size: 15px;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.52;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid rgba(124, 58, 237, 0.75);
+      outline-offset: 3px;
+    }
+
+    #root {
+      min-height: 100dvh;
+    }
+
+    .app-stage {
+      min-height: 100dvh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      color: var(--text);
+    }
+
+    .app-shell {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(8, 13, 26, 0.98) 100%),
+        linear-gradient(135deg, rgba(124, 58, 237, 0.18), transparent 42%, rgba(34, 197, 94, 0.08));
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .app-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 34%, rgba(255, 255, 255, 0.02)),
+        repeating-linear-gradient(90deg, transparent 0 38px, rgba(255, 255, 255, 0.018) 38px 39px);
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 22px 18px 116px;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screen-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .heading-font {
+      font-family: "Poppins", "Inter", sans-serif;
+    }
+
+    .money-font {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background:
+        linear-gradient(135deg, rgba(124, 58, 237, 0.96), rgba(6, 182, 212, 0.86)),
+        #7C3AED;
+      box-shadow: 0 16px 36px rgba(124, 58, 237, 0.36);
+      flex: 0 0 auto;
+    }
+
+    .brand-word {
+      font-family: "Poppins", "Inter", sans-serif;
+      font-size: 1.08rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .soft-card {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.74)),
+        rgba(30, 41, 59, 0.78);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(22px);
+    }
+
+    .soft-card.tight {
+      border-radius: var(--radius-md);
+    }
+
+    .wallet-card {
+      position: relative;
+      padding: 22px;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background:
+        linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(6, 182, 212, 0.58) 56%, rgba(34, 197, 94, 0.32)),
+        linear-gradient(180deg, #1E293B, #111827);
+      box-shadow: 0 26px 72px rgba(7, 11, 20, 0.52), 0 20px 46px rgba(124, 58, 237, 0.2);
+    }
+
+    .wallet-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 44%;
+      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.18));
+      pointer-events: none;
+    }
+
+    .wallet-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric-tile {
+      min-height: 84px;
+      padding: 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .metric-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      display: block;
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 1.04rem;
+      font-weight: 700;
+      line-height: 1.08;
+    }
+
+    .progress-track {
+      height: 10px;
+      width: 100%;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(248, 250, 252, 0.12);
+    }
+
+    .progress-fill {
+      height: 100%;
+      min-width: 8px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #22C55E, #06B6D4, #7C3AED);
+      transition: width 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .progress-fill.danger {
+      background: linear-gradient(90deg, #F59E0B, #EF4444);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.12);
+      background: rgba(15, 23, 42, 0.48);
+      color: var(--text);
+      padding: 7px 11px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.success {
+      color: #BBF7D0;
+      border-color: rgba(34, 197, 94, 0.28);
+      background: rgba(34, 197, 94, 0.13);
+    }
+
+    .pill.warning {
+      color: #FDE68A;
+      border-color: rgba(245, 158, 11, 0.28);
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    .pill.danger {
+      color: #FECACA;
+      border-color: rgba(239, 68, 68, 0.32);
+      background: rgba(239, 68, 68, 0.14);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: "Poppins", "Inter", sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.18;
+    }
+
+    .section-action {
+      color: #C4B5FD;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: transparent;
+      padding: 6px 0;
+    }
+
+    .chart-box {
+      position: relative;
+      height: 218px;
+      width: 100%;
+    }
+
+    .chart-box.short {
+      height: 176px;
+    }
+
+    .chart-box canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .chart-fallback {
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: end;
+      gap: 8px;
+      padding-top: 20px;
+    }
+
+    .fallback-bar {
+      min-height: 12px;
+      border-radius: 999px 999px 6px 6px;
+      background: linear-gradient(180deg, #7C3AED, #06B6D4);
+    }
+
+    .expense-row {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 70px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.48);
+    }
+
+    .expense-row + .expense-row {
+      margin-top: 10px;
+    }
+
+    .icon-chip {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: rgba(124, 58, 237, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .ib-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: currentColor;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .ib-icon svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .category-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 11px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.58);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .category-chip.active {
+      border-color: rgba(124, 58, 237, 0.74);
+      background: rgba(124, 58, 237, 0.24);
+    }
+
+    .category-chip:active,
+    .primary-action:active,
+    .secondary-action:active,
+    .nav-item:active,
+    .fab:active {
+      transform: scale(0.98);
+    }
+
+    .bottom-nav {
+      position: absolute;
+      z-index: 8;
+      left: 14px;
+      right: 14px;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      height: 72px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 24px;
+      border: 1px solid rgba(248, 250, 252, 0.12);
+      background: rgba(15, 23, 42, 0.84);
+      box-shadow: 0 18px 54px rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(24px);
+    }
+
+    .nav-item {
+      height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border-radius: 18px;
+      color: var(--muted);
+      background: transparent;
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .nav-item span:last-child {
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .nav-item.active {
+      color: #F8FAFC;
+      background: rgba(124, 58, 237, 0.24);
+    }
+
+    .fab {
+      position: absolute;
+      z-index: 9;
+      right: 24px;
+      bottom: calc(94px + env(safe-area-inset-bottom));
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      color: white;
+      background: linear-gradient(135deg, #7C3AED, #06B6D4);
+      box-shadow: 0 22px 44px rgba(124, 58, 237, 0.4);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 18px;
+      background: rgba(2, 6, 23, 0.64);
+      backdrop-filter: blur(16px);
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 430px;
+      max-height: min(92dvh, 760px);
+      overflow-y: auto;
+      padding: 18px;
+      border-radius: 30px 30px 24px 24px;
+      border: 1px solid rgba(248, 250, 252, 0.12);
+      background:
+        linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)),
+        #1E293B;
+      box-shadow: var(--shadow);
+    }
+
+    .drag-handle {
+      width: 44px;
+      height: 5px;
+      margin: 0 auto 16px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.36);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .input-shell {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.58);
+      color: var(--text);
+    }
+
+    .input-shell input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .input-shell input::placeholder {
+      color: rgba(148, 163, 184, 0.58);
+    }
+
+    .amount-input {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .primary-action,
+    .secondary-action,
+    .ghost-action {
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      transition: transform 160ms ease, opacity 160ms ease, border-color 160ms ease;
+    }
+
+    .primary-action {
+      color: white;
+      background: linear-gradient(135deg, #7C3AED, #06B6D4);
+      box-shadow: 0 18px 40px rgba(124, 58, 237, 0.28);
+    }
+
+    .secondary-action {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .ghost-action {
+      color: #C4B5FD;
+      background: transparent;
+    }
+
+    .insight-card {
+      min-width: 78%;
+      padding: 15px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(30, 41, 59, 0.64);
+    }
+
+    .horizontal-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .horizontal-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .horizontal-scroll > * {
+      scroll-snap-align: start;
+    }
+
+    .goal-row {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.48);
+    }
+
+    .goal-row + .goal-row {
+      margin-top: 10px;
+    }
+
+    .budget-ring {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 4px auto 14px;
+      background: conic-gradient(var(--primary) var(--progress), rgba(148, 163, 184, 0.16) 0);
+      box-shadow: inset 0 0 0 1px rgba(248, 250, 252, 0.1), 0 18px 44px rgba(0, 0, 0, 0.22);
+    }
+
+    .budget-ring-inner {
+      width: 116px;
+      height: 116px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #101827;
+      border: 1px solid rgba(248, 250, 252, 0.08);
+      text-align: center;
+    }
+
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #7C3AED, #F43F5E);
+      box-shadow: 0 18px 42px rgba(124, 58, 237, 0.28);
+      font-family: "Poppins", "Inter", sans-serif;
+      font-weight: 800;
+      font-size: 1.28rem;
+    }
+
+    .tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .choice-tag {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.5);
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    .choice-tag.active {
+      border-color: rgba(124, 58, 237, 0.76);
+      background: rgba(124, 58, 237, 0.24);
+    }
+
+    .empty-state {
+      min-height: 190px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 26px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .loading-shell,
+    .onboarding-shell {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 20px;
+    }
+
+    .loading-shell {
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .loading-bar {
+      width: 156px;
+      height: 6px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(148, 163, 184, 0.18);
+    }
+
+    .loading-bar span {
+      display: block;
+      width: 62%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #7C3AED, #06B6D4, #22C55E);
+      animation: loadingSlide 1.1s infinite ease-in-out;
+    }
+
+    @keyframes loadingSlide {
+      0% { transform: translateX(-110%); }
+      100% { transform: translateX(175%); }
+    }
+
+    .onboarding-shell {
+      justify-content: space-between;
+      gap: 22px;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    .onboarding-content {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding-top: 18px;
+      min-width: 0;
+    }
+
+    .onboarding-content h1 {
+      overflow-wrap: anywhere;
+    }
+
+    .onboarding-art {
+      min-height: 210px;
+      display: grid;
+      align-items: end;
+      padding: 18px;
+      border-radius: 32px;
+      border: 1px solid rgba(248, 250, 252, 0.12);
+      background:
+        linear-gradient(135deg, rgba(124, 58, 237, 0.84), rgba(6, 182, 212, 0.46)),
+        linear-gradient(180deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+      overflow: hidden;
+    }
+
+    .mini-phone {
+      width: 74%;
+      max-width: 260px;
+      min-height: 150px;
+      border-radius: 26px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.54);
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .success-toast {
+      position: absolute;
+      z-index: 40;
+      left: 50%;
+      bottom: calc(184px + env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 10px 14px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      color: #DCFCE7;
+      background: rgba(22, 101, 52, 0.88);
+      box-shadow: 0 18px 44px rgba(34, 197, 94, 0.22);
+      backdrop-filter: blur(16px);
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+    }
+
+    .split-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .split-actions > * {
+      min-width: 0;
+      width: 100%;
+    }
+
+    @media (min-width: 560px) {
+      body {
+        padding: 24px;
+      }
+
+      .app-stage {
+        align-items: center;
+      }
+
+      .app-shell {
+        max-width: 440px;
+        height: min(920px, calc(100dvh - 48px));
+        max-height: 920px;
+        border-radius: 36px;
+        border: 1px solid rgba(248, 250, 252, 0.12);
+        box-shadow: 0 36px 110px rgba(0, 0, 0, 0.5);
+      }
+
+      .screen,
+      .onboarding-shell,
+      .loading-shell {
+        border-radius: 36px;
+      }
+
+      .modal-backdrop {
+        align-items: center;
+      }
+
+      .modal-sheet {
+        border-radius: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <noscript>InfinityBudget needs JavaScript to run.</noscript>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <script>
+    window.Motion = window.Motion || window.FramerMotion || window.framerMotion;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+
+    function createFallbackMotion() {
+      return new Proxy({}, {
+        get: (_, tag) => React.forwardRef((props, ref) => {
+          const {
+            animate,
+            children,
+            exit,
+            initial,
+            layout,
+            transition,
+            variants,
+            whileHover,
+            whileTap,
+            ...rest
+          } = props;
+          return React.createElement(tag, { ...rest, ref }, children);
+        })
+      });
+    }
+
+    const motion =
+      window.Motion?.motion ||
+      window.FramerMotion?.motion ||
+      window.framerMotion?.motion ||
+      createFallbackMotion();
+    const AnimatePresence =
+      window.Motion?.AnimatePresence ||
+      window.FramerMotion?.AnimatePresence ||
+      window.framerMotion?.AnimatePresence ||
+      (({ children }) => <>{children}</>);
+
+    const STORAGE_KEY = "infinitybudget_launch_ready_v1";
+    const AUTH_STORAGE_KEY = "infinitybudget_auth_session_v1";
+    const API_BASE_URL = "http://localhost:5001/api";
+    const SUPABASE_URL = "";
+    const SUPABASE_ANON_KEY = "";
+
+    const moneyFormat = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    });
+
+    const compactFormat = new Intl.NumberFormat("en-IN", {
+      notation: "compact",
+      maximumFractionDigits: 1
+    });
+
+    const categoryConfig = [
+      { name: "Food", icon: "utensils", color: "#F97316", soft: "rgba(249, 115, 22, 0.16)" },
+      { name: "Travel", icon: "bus", color: "#06B6D4", soft: "rgba(6, 182, 212, 0.16)" },
+      { name: "Shopping", icon: "shopping-bag", color: "#F43F5E", soft: "rgba(244, 63, 94, 0.16)" },
+      { name: "Entertainment", icon: "clapperboard", color: "#A855F7", soft: "rgba(168, 85, 247, 0.16)" },
+      { name: "College", icon: "graduation-cap", color: "#22C55E", soft: "rgba(34, 197, 94, 0.16)" },
+      { name: "Bills", icon: "receipt", color: "#F59E0B", soft: "rgba(245, 158, 11, 0.16)" },
+      { name: "Friends", icon: "users", color: "#60A5FA", soft: "rgba(96, 165, 250, 0.16)" }
+    ];
+
+    const spendingHabits = [
+      "Cafe runs",
+      "Hostel food",
+      "Ride sharing",
+      "Online shopping",
+      "Movie nights",
+      "Group payments"
+    ];
+
+    const starterGoals = [
+      "Save weekly",
+      "Cut food spends",
+      "No-spend weekends",
+      "Trip fund",
+      "Emergency stash",
+      "Pay bills early"
+    ];
+
+    const navItems = [
+      { id: "home", label: "Home", icon: "home" },
+      { id: "analytics", label: "Insights", icon: "bar-chart-3" },
+      { id: "budget", label: "Budget", icon: "target" },
+      { id: "profile", label: "Profile", icon: "user-round" }
+    ];
+
+    const fallbackIcons = {
+      "bar-chart-3": "||",
+      "bus": "T",
+      "calendar": "D",
+      "check": "OK",
+      "chevron-left": "<",
+      "clapperboard": "E",
+      "download": "DL",
+      "graduation-cap": "C",
+      "home": "H",
+      "plus": "+",
+      "receipt": "R",
+      "settings": "S",
+      "shopping-bag": "B",
+      "sparkles": "*",
+      "target": "G",
+      "trash-2": "x",
+      "trending-down": "v",
+      "trending-up": "^",
+      "user-round": "U",
+      "users": "F",
+      "utensils": "F",
+      "wallet": "W",
+      "zap": "Z"
+    };
+
+    function toLucideKey(name) {
+      return name
+        .split("-")
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("");
+    }
+
+    function Icon({ name, size = 20, stroke = 2.2, className = "" }) {
+      const ref = useRef(null);
+
+      useEffect(() => {
+        const target = ref.current;
+        if (!target) return;
+
+        const key = toLucideKey(name);
+        const icon = window.lucide?.icons?.[key];
+        target.textContent = "";
+
+        if (icon?.toSvg) {
+          target.innerHTML = icon.toSvg({
+            width: size,
+            height: size,
+            "stroke-width": stroke,
+            "aria-hidden": "true"
+          });
+          return;
+        }
+
+        if (icon && window.lucide?.createElement) {
+          const svg = window.lucide.createElement(icon, {
+            width: size,
+            height: size,
+            "stroke-width": stroke,
+            "aria-hidden": "true"
+          });
+          target.replaceChildren(svg);
+          return;
+        }
+
+        target.textContent = fallbackIcons[name] || ".";
+      }, [name, size, stroke]);
+
+      return <span ref={ref} className={`ib-icon ${className}`} style={{ width: size, height: size }} aria-hidden="true" />;
+    }
+
+    function formatMoney(value) {
+      return moneyFormat.format(Math.round(Number(value) || 0));
+    }
+
+    function formatCompactMoney(value) {
+      return compactFormat.format(Math.round(Number(value) || 0));
+    }
+
+    function toLocalISO(date = new Date()) {
+      const normalized = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return normalized.toISOString().slice(0, 10);
+    }
+
+    function relativeDate(offset) {
+      const date = new Date();
+      date.setDate(date.getDate() + offset);
+      return toLocalISO(date);
+    }
+
+    function dayName(dateValue, short = false) {
+      return new Date(dateValue).toLocaleDateString("en-IN", { weekday: short ? "short" : "long" });
+    }
+
+    function monthLabel(dateValue) {
+      return new Date(dateValue).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+    }
+
+    function getCategory(name) {
+      return categoryConfig.find(category => category.name === name) || categoryConfig[0];
+    }
+
+    function sum(list, selector = item => item.amount) {
+      return list.reduce((total, item) => total + (Number(selector(item)) || 0), 0);
+    }
+
+    function sameMonth(dateValue, now = new Date()) {
+      const date = new Date(dateValue);
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    }
+
+    function createInitialData() {
+      const seedExpenses = [
+        { amount: 180, category: "Food", note: "Campus cafe", offset: 0 },
+        { amount: 90, category: "Travel", note: "Metro card", offset: -1 },
+        { amount: 340, category: "College", note: "Lab printouts", offset: -2 },
+        { amount: 220, category: "Friends", note: "Split dinner", offset: -3 },
+        { amount: 699, category: "Entertainment", note: "Movie night", offset: -4 },
+        { amount: 1250, category: "Shopping", note: "Sneakers", offset: -6 },
+        { amount: 499, category: "Bills", note: "Mobile plan", offset: -8 },
+        { amount: 160, category: "Food", note: "Evening snacks", offset: -9 },
+        { amount: 210, category: "Travel", note: "Auto ride", offset: -11 },
+        { amount: 520, category: "Food", note: "Weekend brunch", offset: -13 },
+        { amount: 300, category: "College", note: "Notebook set", offset: -16 },
+        { amount: 240, category: "Friends", note: "Birthday share", offset: -18 }
+      ].map(item => ({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        amount: item.amount,
+        category: item.category,
+        note: item.note,
+        date: relativeDate(item.offset)
+      }));
+
+      return {
+        onboardingDone: false,
+        budget: 12000,
+        profile: {
+          name: "Riya",
+          college: "North Campus",
+          avatar: "RI"
+        },
+        habits: ["Cafe runs", "Ride sharing", "Group payments"],
+        goals: ["Save weekly", "No-spend weekends", "Trip fund"],
+        savingsGoals: [
+          { id: "goal-laptop", name: "Laptop fund", target: 45000, saved: 18500 },
+          { id: "goal-trip", name: "Semester trip", target: 12000, saved: 5400 }
+        ],
+        expenses: seedExpenses
+      };
+    }
+
+    function loadSession() {
+      try {
+        const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveSession(session) {
+      if (session) {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+      } else {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+    }
+
+    function profileFromUser(user = {}) {
+      const fullName = user.fullName || "Student";
+      const avatar = fullName
+        .split(" ")
+        .map(part => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+      return {
+        name: fullName,
+        college: user.collegeName || "College",
+        avatar
+      };
+    }
+
+    function mapRemoteExpense(expense) {
+      return {
+        id: expense._id,
+        amount: expense.amount,
+        category: expense.category,
+        note: expense.note || expense.subcategory || expense.category,
+        date: toLocalISO(new Date(expense.expenseDate || expense.createdAt || Date.now()))
+      };
+    }
+
+    function mapRemoteGoal(goal) {
+      return {
+        id: goal._id,
+        name: goal.title,
+        target: goal.targetAmount,
+        saved: goal.savedAmount
+      };
+    }
+
+    async function apiRequest(path, options = {}, session = loadSession()) {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      };
+
+      if (session?.tokens?.accessToken) {
+        headers.Authorization = `Bearer ${session.tokens.accessToken}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+
+      const contentType = response.headers.get("content-type") || "";
+      const payload = contentType.includes("application/json") ? await response.json() : {};
+
+      if (!response.ok) {
+        throw new Error(payload.message || "API request failed");
+      }
+
+      return payload;
+    }
+
+    async function fetchBackendData(session, currentData) {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
+      const [userRes, expensesRes, budgetRes, goalsRes] = await Promise.all([
+        apiRequest("/users/me", {}, session),
+        apiRequest("/expenses?limit=100&sort=newest", {}, session),
+        apiRequest(`/budgets/current?month=${month}&year=${year}`, {}, session),
+        apiRequest("/goals?limit=100", {}, session)
+      ]);
+
+      return {
+        ...currentData,
+        onboardingDone: Boolean(userRes.user?.onboardingCompleted || currentData.onboardingDone),
+        profile: profileFromUser(userRes.user),
+        budget: budgetRes.budget?.monthlyLimit || currentData.budget,
+        expenses: Array.isArray(expensesRes.data) ? expensesRes.data.map(mapRemoteExpense) : currentData.expenses,
+        savingsGoals: Array.isArray(goalsRes.data) && goalsRes.data.length
+          ? goalsRes.data.map(mapRemoteGoal)
+          : currentData.savingsGoals
+      };
+    }
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return createInitialData();
+        const parsed = JSON.parse(saved);
+        return {
+          ...createInitialData(),
+          ...parsed,
+          profile: { ...createInitialData().profile, ...(parsed.profile || {}) },
+          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : createInitialData().expenses,
+          savingsGoals: Array.isArray(parsed.savingsGoals) ? parsed.savingsGoals : createInitialData().savingsGoals
+        };
+      } catch {
+        return createInitialData();
+      }
+    }
+
+    function usePersistentData() {
+      const [data, setData] = useState(loadData);
+
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }, [data]);
+
+      return [data, setData];
+    }
+
+    function getStats(data) {
+      const now = new Date();
+      const monthExpenses = data.expenses.filter(expense => sameMonth(expense.date, now));
+      const spent = sum(monthExpenses);
+      const budget = Number(data.budget) || 0;
+      const remaining = budget - spent;
+      const progress = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
+      const todayNumber = now.getDate();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const daysLeft = Math.max(0, daysInMonth - todayNumber);
+      const dailyAverage = todayNumber > 0 ? spent / todayNumber : 0;
+      const dailyBudget = budget / Math.max(1, daysInMonth);
+
+      const last7 = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (6 - index));
+        const iso = toLocalISO(date);
+        const total = sum(data.expenses.filter(expense => expense.date === iso));
+        return { iso, label: dayName(iso, true), total };
+      });
+
+      const previous7 = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (13 - index));
+        const iso = toLocalISO(date);
+        return sum(data.expenses.filter(expense => expense.date === iso));
+      });
+
+      const categoryTotals = categoryConfig.map(category => ({
+        ...category,
+        amount: sum(monthExpenses.filter(expense => expense.category === category.name))
+      })).sort((a, b) => b.amount - a.amount);
+
+      const topCategory = categoryTotals.find(category => category.amount > 0) || categoryTotals[0];
+
+      const dayTotals = last7.map(day => ({
+        ...day,
+        weekday: dayName(day.iso),
+        total: sum(data.expenses.filter(expense => expense.date === day.iso))
+      }));
+
+      const mostExpensiveDay = [...dayTotals].sort((a, b) => b.total - a.total)[0];
+
+      let streak = 0;
+      for (let index = 0; index < 30; index += 1) {
+        const date = new Date();
+        date.setDate(date.getDate() - index);
+        const iso = toLocalISO(date);
+        const daySpent = sum(data.expenses.filter(expense => expense.date === iso));
+        if (daySpent <= dailyBudget) streak += 1;
+        else break;
+      }
+
+      const noSpendDays = last7.filter(day => day.total === 0).length;
+      const weekSpent = sum(last7, day => day.total);
+      const prevWeekSpent = sum(previous7.map(amount => ({ amount })));
+      const foodThisWeek = sum(data.expenses.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        const start = new Date();
+        start.setDate(start.getDate() - 6);
+        return expense.category === "Food" && expenseDate >= start;
+      }));
+      const foodPrevWeek = sum(data.expenses.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        const start = new Date();
+        const end = new Date();
+        start.setDate(start.getDate() - 13);
+        end.setDate(end.getDate() - 7);
+        return expense.category === "Food" && expenseDate >= start && expenseDate <= end;
+      }));
+
+      const projectedSpend = spent + dailyAverage * daysLeft;
+      const projectedSavings = Math.max(0, budget - projectedSpend);
+      const safeToSpendDaily = daysLeft > 0 ? Math.max(0, remaining / daysLeft) : Math.max(0, remaining);
+
+      return {
+        budget,
+        categoryTotals,
+        dailyAverage,
+        dailyBudget,
+        daysLeft,
+        foodPrevWeek,
+        foodThisWeek,
+        last7,
+        monthExpenses,
+        mostExpensiveDay,
+        noSpendDays,
+        previous7,
+        prevWeekSpent,
+        progress,
+        projectedSavings,
+        remaining,
+        safeToSpendDaily,
+        spent,
+        streak,
+        topCategory,
+        weekSpent
+      };
+    }
+
+    function makeInsights(stats) {
+      const insights = [];
+      if (stats.foodPrevWeek > 0 && stats.foodThisWeek > stats.foodPrevWeek * 1.15) {
+        const pct = Math.round(((stats.foodThisWeek - stats.foodPrevWeek) / stats.foodPrevWeek) * 100);
+        insights.push({
+          tone: "warning",
+          icon: "trending-up",
+          title: `Food is up ${pct}%`,
+          body: `A packed lunch day could save ${formatMoney(Math.min(500, stats.foodThisWeek * 0.18))} this week.`
+        });
+      } else {
+        insights.push({
+          tone: "success",
+          icon: "trending-down",
+          title: "Food is steady",
+          body: `${formatMoney(stats.foodThisWeek)} spent on food in the last 7 days.`
+        });
+      }
+
+      insights.push({
+        tone: stats.remaining >= 0 ? "success" : "danger",
+        icon: "wallet",
+        title: stats.remaining >= 0 ? "Still in control" : "Budget crossed",
+        body: stats.remaining >= 0
+          ? `You can still save ${formatMoney(Math.max(0, stats.projectedSavings))} this month.`
+          : `Slow down by ${formatMoney(Math.abs(stats.remaining))} to get back on track.`
+      });
+
+      insights.push({
+        tone: "info",
+        icon: "calendar",
+        title: `${stats.mostExpensiveDay.weekday} was highest`,
+        body: `${formatMoney(stats.mostExpensiveDay.total)} went out on ${stats.mostExpensiveDay.weekday}.`
+      });
+
+      return insights;
+    }
+
+    function CountUp({ value, formatter = formatMoney, className = "" }) {
+      const [display, setDisplay] = useState(Number(value) || 0);
+      const previous = useRef(Number(value) || 0);
+
+      useEffect(() => {
+        const startValue = previous.current;
+        const endValue = Number(value) || 0;
+        const start = performance.now();
+        const duration = 620;
+        let frame;
+
+        const tick = time => {
+          const progress = Math.min(1, (time - start) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setDisplay(startValue + (endValue - startValue) * eased);
+          if (progress < 1) {
+            frame = requestAnimationFrame(tick);
+          } else {
+            previous.current = endValue;
+          }
+        };
+
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+      }, [value]);
+
+      return <span className={className}>{formatter(display)}</span>;
+    }
+
+    function AuthScreen({ onAuth }) {
+      const [mode, setMode] = useState("login");
+      const [form, setForm] = useState({
+        fullName: "",
+        email: "",
+        password: "",
+        collegeName: ""
+      });
+      const [error, setError] = useState("");
+      const [busy, setBusy] = useState(false);
+
+      const submit = async event => {
+        event.preventDefault();
+        setError("");
+        setBusy(true);
+
+        try {
+          const path = mode === "login" ? "/auth/login" : "/auth/register";
+          const body = mode === "login"
+            ? { email: form.email, password: form.password }
+            : {
+                fullName: form.fullName,
+                email: form.email,
+                password: form.password,
+                collegeName: form.collegeName,
+                currency: "INR"
+              };
+          const result = await apiRequest(path, { method: "POST", body }, null);
+          const session = { user: result.user, tokens: result.tokens };
+          saveSession(session);
+          onAuth(session);
+        } catch (authError) {
+          setError(authError.message || "Could not sign in");
+        } finally {
+          setBusy(false);
+        }
+      };
+
+      return (
+        <div className="app-stage">
+          <div className="app-shell">
+            <form className="onboarding-shell" onSubmit={submit}>
+              <div>
+                <div className="flex items-center gap-3">
+                  <div className="brand-mark"><Icon name="zap" size={22} /></div>
+                  <div>
+                    <div className="brand-word">InfinityBudget</div>
+                    <div className="muted text-xs font-bold">Backend connected</div>
+                  </div>
+                </div>
+              </div>
+
+              <motion.div
+                className="onboarding-content"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.32 }}
+              >
+                <div className="onboarding-art">
+                  <div className="mini-phone">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="pill success"><span className="status-dot" /> API live</span>
+                      <Icon name="wallet" size={22} />
+                    </div>
+                    <div className="muted text-xs font-bold mb-1">Student finance</div>
+                    <div className="money-font text-4xl font-extrabold">{formatMoney(12000)}</div>
+                    <div className="progress-track mt-4">
+                      <div className="progress-fill" style={{ width: "56%" }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h1 className="heading-font text-3xl font-extrabold leading-tight">
+                    {mode === "login" ? "Welcome back." : "Create your money space."}
+                  </h1>
+                  <p className="muted mt-3 leading-6">
+                    {mode === "login"
+                      ? "Sign in to sync expenses, budgets, goals, and analytics with MongoDB."
+                      : "Start with secure auth, real storage, and your own student budget."}
+                  </p>
+                </div>
+
+                <div className="soft-card p-4 space-y-3">
+                  {mode === "register" && (
+                    <>
+                      <div className="field">
+                        <label>Full name</label>
+                        <div className="input-shell">
+                          <input
+                            value={form.fullName}
+                            onChange={event => setForm({ ...form, fullName: event.target.value })}
+                            placeholder="Akshay Deshpande"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="field">
+                        <label>College</label>
+                        <div className="input-shell">
+                          <input
+                            value={form.collegeName}
+                            onChange={event => setForm({ ...form, collegeName: event.target.value })}
+                            placeholder="Your college name"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="field">
+                    <label>Email</label>
+                    <div className="input-shell">
+                      <input
+                        type="email"
+                        value={form.email}
+                        onChange={event => setForm({ ...form, email: event.target.value })}
+                        placeholder="you@college.edu"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label>Password</label>
+                    <div className="input-shell">
+                      <input
+                        type="password"
+                        value={form.password}
+                        onChange={event => setForm({ ...form, password: event.target.value })}
+                        placeholder="Minimum 8 characters"
+                        minLength={mode === "register" ? 8 : 1}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {error && <div className="pill danger w-full justify-center">{error}</div>}
+                </div>
+              </motion.div>
+
+              <div className="space-y-3">
+                <button className="primary-action w-full" type="submit" disabled={busy}>
+                  <Icon name={mode === "login" ? "user-round" : "plus"} size={19} />
+                  {busy ? "Connecting..." : mode === "login" ? "Login" : "Create account"}
+                </button>
+                <button
+                  className="secondary-action w-full"
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "login" ? "register" : "login");
+                    setError("");
+                  }}
+                >
+                  {mode === "login" ? "New here? Register" : "Already have account? Login"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    function LoadingScreen() {
+      return (
+        <div className="app-stage">
+          <div className="app-shell">
+            <div className="loading-shell">
+              <motion.div
+                className="brand-mark"
+                initial={{ scale: 0.84, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.45 }}
+              >
+                <Icon name="zap" size={24} />
+              </motion.div>
+              <div className="text-center">
+                <div className="brand-word">InfinityBudget</div>
+                <p className="muted mt-2 text-sm">Getting your money calm.</p>
+              </div>
+              <div className="loading-bar"><span /></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Onboarding({ data, setData, session }) {
+      const [step, setStep] = useState(0);
+      const [budget, setBudget] = useState(data.budget || 12000);
+      const [habits, setHabits] = useState(data.habits || []);
+      const [goals, setGoals] = useState(data.goals || []);
+      const steps = ["Welcome", "Budget", "Habits", "Goals", "Start"];
+
+      const toggle = (list, value, setter) => {
+        setter(list.includes(value) ? list.filter(item => item !== value) : [...list, value]);
+      };
+
+      const finish = async () => {
+        const nextBudget = Math.max(1000, Number(budget) || 12000);
+
+        setData(prev => ({
+          ...prev,
+          budget: nextBudget,
+          habits,
+          goals,
+          onboardingDone: true
+        }));
+
+        if (session) {
+          try {
+            await Promise.all([
+              apiRequest("/users/onboarding", {
+                method: "PATCH",
+                body: {
+                  onboardingCompleted: true,
+                  collegeName: data.profile.college || "",
+                  currency: "INR"
+                }
+              }, session),
+              apiRequest("/budgets", {
+                method: "POST",
+                body: {
+                  monthlyLimit: nextBudget,
+                  warningThreshold: 80,
+                  month: new Date().getMonth() + 1,
+                  year: new Date().getFullYear()
+                }
+              }, session)
+            ]);
+          } catch (error) {
+            console.warn("Onboarding synced locally, backend update failed:", error.message);
+          }
+        }
+      };
+
+      return (
+        <div className="app-stage">
+          <div className="app-shell">
+            <div className="onboarding-shell">
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="brand-mark"><Icon name="zap" size={22} /></div>
+                    <div>
+                      <div className="brand-word">InfinityBudget</div>
+                      <div className="muted text-xs font-bold">{steps[step]}</div>
+                    </div>
+                  </div>
+                  <span className="pill">{step + 1}/5</span>
+                </div>
+
+                <div className="progress-track mt-6">
+                  <div className="progress-fill" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
+                </div>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  className="onboarding-content"
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -24 }}
+                  transition={{ duration: 0.28 }}
+                >
+                  {step === 0 && (
+                    <>
+                      <div className="onboarding-art">
+                        <div className="mini-phone">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="pill success"><span className="status-dot" /> On track</span>
+                            <Icon name="wallet" size={22} />
+                          </div>
+                          <div className="muted text-xs font-bold mb-1">Budget left</div>
+                          <div className="money-font text-4xl font-extrabold">{formatMoney(8420)}</div>
+                          <div className="progress-track mt-4">
+                            <div className="progress-fill" style={{ width: "42%" }} />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h1 className="heading-font text-3xl font-extrabold leading-tight">Money tracking that feels light.</h1>
+                        <p className="muted mt-3 leading-6">Built for daily student life: fast spends, food runs, trips, split bills, and the tiny wins that keep you in control.</p>
+                      </div>
+                    </>
+                  )}
+
+                  {step === 1 && (
+                    <>
+                      <div>
+                        <h1 className="heading-font text-3xl font-extrabold leading-tight">Set your monthly comfort zone.</h1>
+                        <p className="muted mt-3 leading-6">Pick a number that covers essentials and leaves space for the fun stuff.</p>
+                      </div>
+                      <div className="soft-card p-4">
+                        <div className="field">
+                          <label>Monthly budget</label>
+                          <div className="input-shell">
+                            <span className="money-font text-2xl font-bold">INR</span>
+                            <input
+                              className="amount-input"
+                              inputMode="numeric"
+                              value={budget}
+                              onChange={event => setBudget(event.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="metric-grid mt-4">
+                          <div className="metric-tile">
+                            <span className="metric-label">Daily pace</span>
+                            <span className="metric-value">{formatMoney((Number(budget) || 0) / 30)}</span>
+                          </div>
+                          <div className="metric-tile">
+                            <span className="metric-label">Weekly</span>
+                            <span className="metric-value">{formatMoney((Number(budget) || 0) / 4)}</span>
+                          </div>
+                          <div className="metric-tile">
+                            <span className="metric-label">Buffer</span>
+                            <span className="metric-value">{formatMoney((Number(budget) || 0) * 0.12)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {step === 2 && (
+                    <>
+                      <div>
+                        <h1 className="heading-font text-3xl font-extrabold leading-tight">What usually gets your money?</h1>
+                        <p className="muted mt-3 leading-6">Choose the patterns you want InfinityBudget to watch more closely.</p>
+                      </div>
+                      <div className="tag-grid">
+                        {spendingHabits.map(habit => (
+                          <button
+                            key={habit}
+                            className={`choice-tag ${habits.includes(habit) ? "active" : ""}`}
+                            onClick={() => toggle(habits, habit, setHabits)}
+                          >
+                            {habits.includes(habit) && <Icon name="check" size={16} />}
+                            {habit}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {step === 3 && (
+                    <>
+                      <div>
+                        <h1 className="heading-font text-3xl font-extrabold leading-tight">Choose your money mood.</h1>
+                        <p className="muted mt-3 leading-6">Your dashboard will highlight progress toward these goals.</p>
+                      </div>
+                      <div className="tag-grid">
+                        {starterGoals.map(goal => (
+                          <button
+                            key={goal}
+                            className={`choice-tag ${goals.includes(goal) ? "active" : ""}`}
+                            onClick={() => toggle(goals, goal, setGoals)}
+                          >
+                            {goals.includes(goal) && <Icon name="check" size={16} />}
+                            {goal}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {step === 4 && (
+                    <>
+                      <div className="soft-card p-5">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="icon-chip" style={{ background: "rgba(34,197,94,0.16)", color: "#86EFAC" }}>
+                            <Icon name="sparkles" size={23} />
+                          </div>
+                          <div>
+                            <h1 className="heading-font text-2xl font-extrabold">You are ready.</h1>
+                            <p className="muted text-sm">Fast tracking, calm insights, and small wins from day one.</p>
+                          </div>
+                        </div>
+                        <div className="metric-grid">
+                          <div className="metric-tile">
+                            <span className="metric-label">Budget</span>
+                            <span className="metric-value">{formatCompactMoney(budget)}</span>
+                          </div>
+                          <div className="metric-tile">
+                            <span className="metric-label">Habits</span>
+                            <span className="metric-value">{habits.length}</span>
+                          </div>
+                          <div className="metric-tile">
+                            <span className="metric-label">Goals</span>
+                            <span className="metric-value">{goals.length}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="muted leading-6">Track one expense today. That is enough to start building a better month.</p>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="split-actions">
+                <button
+                  className="secondary-action"
+                  onClick={() => setStep(Math.max(0, step - 1))}
+                  disabled={step === 0}
+                >
+                  <Icon name="chevron-left" size={18} />
+                  Back
+                </button>
+                <button
+                  className="primary-action"
+                  onClick={step === steps.length - 1 ? finish : () => setStep(step + 1)}
+                >
+                  {step === steps.length - 1 ? "Start tracking" : "Continue"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AppHeader({ data, stats }) {
+      const firstName = data.profile.name?.split(" ")[0] || "Student";
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? "Morning" : hour < 18 ? "Hey" : "Evening";
+      const health = stats.progress < 75 ? "On track" : stats.progress < 92 ? "Watch pace" : "Slow down";
+      const healthClass = stats.progress < 75 ? "success" : stats.progress < 92 ? "warning" : "danger";
+
+      return (
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="muted text-sm font-bold">{greeting}, {firstName}</div>
+            <h1 className="heading-font text-3xl font-extrabold leading-tight mt-1">Spend smart today.</h1>
+          </div>
+          <span className={`pill ${healthClass}`}>
+            <span className="status-dot" />
+            {health}
+          </span>
+        </div>
+      );
+    }
+
+    function WalletCard({ stats }) {
+      const fillClass = stats.progress >= 90 ? "danger" : "";
+
+      return (
+        <motion.section
+          className="wallet-card"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          whileTap={{ scale: 0.995 }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold opacity-80">Budget left</div>
+              <CountUp value={stats.remaining} className="money-font block text-5xl font-extrabold mt-2" />
+            </div>
+            <div className="icon-chip" style={{ background: "rgba(255,255,255,0.16)" }}>
+              <Icon name="wallet" size={25} />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex justify-between text-sm font-bold opacity-85 mb-2">
+              <span>{formatMoney(stats.spent)} spent</span>
+              <span>{Math.round(stats.progress)}%</span>
+            </div>
+            <div className="progress-track">
+              <div className={`progress-fill ${fillClass}`} style={{ width: `${Math.max(3, stats.progress)}%` }} />
+            </div>
+            <div className="flex justify-between text-xs font-bold opacity-75 mt-3">
+              <span>Monthly budget {formatMoney(stats.budget)}</span>
+              <span>{formatMoney(stats.safeToSpendDaily)} / day</span>
+            </div>
+          </div>
+        </motion.section>
+      );
+    }
+
+    function MetricGrid({ stats }) {
+      return (
+        <div className="metric-grid">
+          <motion.div className="metric-tile" whileHover={{ y: -2 }}>
+            <span className="metric-label">This week</span>
+            <CountUp value={stats.weekSpent} className="metric-value" />
+          </motion.div>
+          <motion.div className="metric-tile" whileHover={{ y: -2 }}>
+            <span className="metric-label">Daily avg</span>
+            <CountUp value={stats.dailyAverage} className="metric-value" />
+          </motion.div>
+          <motion.div className="metric-tile" whileHover={{ y: -2 }}>
+            <span className="metric-label">Streak</span>
+            <span className="metric-value">{stats.streak}d</span>
+          </motion.div>
+        </div>
+      );
+    }
+
+    function ChartCard({ title, subtitle, children }) {
+      return (
+        <section className="soft-card p-4">
+          <div className="section-head">
+            <div>
+              <h2 className="section-title">{title}</h2>
+              {subtitle && <p className="muted text-xs mt-1">{subtitle}</p>}
+            </div>
+          </div>
+          {children}
+        </section>
+      );
+    }
+
+    function SpendingChart({ variant, labels, values, colors = [] }) {
+      const canvasRef = useRef(null);
+      const [hasChart, setHasChart] = useState(Boolean(window.Chart));
+      const key = JSON.stringify({ variant, labels, values, colors });
+
+      useEffect(() => {
+        if (!window.Chart || !canvasRef.current) {
+          setHasChart(false);
+          return undefined;
+        }
+
+        setHasChart(true);
+        const context = canvasRef.current.getContext("2d");
+        const hasData = values.some(value => Number(value) > 0);
+        const lineGradient = context.createLinearGradient(0, 0, 0, 220);
+        lineGradient.addColorStop(0, "rgba(124, 58, 237, 0.42)");
+        lineGradient.addColorStop(1, "rgba(124, 58, 237, 0)");
+
+        const config = variant === "doughnut"
+          ? {
+              type: "doughnut",
+              data: {
+                labels: hasData ? labels : ["No spends"],
+                datasets: [{
+                  data: hasData ? values : [1],
+                  borderWidth: 0,
+                  backgroundColor: hasData ? colors : ["rgba(148, 163, 184, 0.18)"],
+                  hoverOffset: 8
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "70%",
+                animation: { animateRotate: true, duration: 850 },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    enabled: hasData,
+                    backgroundColor: "#0F172A",
+                    borderColor: "rgba(248,250,252,0.14)",
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                      label: item => `${item.label}: ${formatMoney(item.raw)}`
+                    }
+                  }
+                }
+              }
+            }
+          : {
+              type: variant,
+              data: {
+                labels,
+                datasets: [{
+                  data: values,
+                  tension: 0.42,
+                  fill: variant === "line",
+                  backgroundColor: variant === "line" ? lineGradient : "rgba(124, 58, 237, 0.76)",
+                  borderColor: "#A78BFA",
+                  pointRadius: variant === "line" ? 4 : 0,
+                  pointBackgroundColor: "#F8FAFC",
+                  pointBorderColor: "#7C3AED",
+                  pointBorderWidth: 3,
+                  borderRadius: 12,
+                  borderWidth: variant === "line" ? 3 : 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 850, easing: "easeOutQuart" },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: "#0F172A",
+                    borderColor: "rgba(248,250,252,0.14)",
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                      label: item => formatMoney(item.raw)
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { color: "#94A3B8", font: { family: "Inter", weight: "700" } },
+                    border: { display: false }
+                  },
+                  y: {
+                    grid: { color: "rgba(148,163,184,0.12)" },
+                    ticks: {
+                      color: "#94A3B8",
+                      padding: 8,
+                      callback: value => formatCompactMoney(value)
+                    },
+                    border: { display: false }
+                  }
+                }
+              }
+            };
+
+        const chart = new window.Chart(context, config);
+        return () => chart.destroy();
+      }, [key]);
+
+      const max = Math.max(...values, 1);
+
+      return (
+        <div className={`chart-box ${variant === "doughnut" ? "short" : ""}`}>
+          {hasChart ? (
+            <canvas ref={canvasRef} />
+          ) : (
+            <div className="chart-fallback">
+              {values.map((value, index) => (
+                <div
+                  key={labels[index] || index}
+                  className="fallback-bar"
+                  style={{ height: `${Math.max(8, (value / max) * 100)}%` }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function SmartInsights({ stats }) {
+      const insights = makeInsights(stats);
+      return (
+        <section>
+          <div className="section-head">
+            <h2 className="section-title">Smart insights</h2>
+          </div>
+          <div className="horizontal-scroll">
+            {insights.map((insight, index) => (
+              <motion.div
+                className="insight-card"
+                key={insight.title}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="icon-chip"
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 13,
+                      background: insight.tone === "danger"
+                        ? "rgba(239,68,68,0.16)"
+                        : insight.tone === "warning"
+                          ? "rgba(245,158,11,0.16)"
+                          : "rgba(34,197,94,0.16)",
+                      color: insight.tone === "danger"
+                        ? "#FCA5A5"
+                        : insight.tone === "warning"
+                          ? "#FCD34D"
+                          : "#86EFAC"
+                    }}
+                  >
+                    <Icon name={insight.icon} size={20} />
+                  </div>
+                  <div className="font-extrabold">{insight.title}</div>
+                </div>
+                <p className="muted text-sm leading-5">{insight.body}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function ExpenseRow({ expense, onDelete }) {
+      const category = getCategory(expense.category);
+      return (
+        <motion.div
+          className="expense-row"
+          layout
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, x: -18 }}
+        >
+          <div className="icon-chip" style={{ background: category.soft, color: category.color }}>
+            <Icon name={category.icon} size={22} />
+          </div>
+          <div className="min-w-0">
+            <div className="font-extrabold truncate">{expense.note || expense.category}</div>
+            <div className="muted text-xs font-bold mt-1">{expense.category} - {monthLabel(expense.date)}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="money-font font-extrabold text-right">{formatMoney(expense.amount)}</div>
+            {onDelete && (
+              <button className="ghost-action" style={{ minHeight: 36, width: 36 }} onClick={() => onDelete(expense.id)} aria-label="Delete expense">
+                <Icon name="trash-2" size={17} />
+              </button>
+            )}
+          </div>
+        </motion.div>
+      );
+    }
+
+    function RecentTransactions({ expenses, onDelete, onViewAll }) {
+      const recent = [...expenses]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+
+      return (
+        <section className="soft-card p-4">
+          <div className="section-head">
+            <h2 className="section-title">Recent spends</h2>
+            <button className="section-action" onClick={onViewAll}>View all</button>
+          </div>
+          {recent.length ? (
+            <AnimatePresence>
+              {recent.map(expense => (
+                <ExpenseRow key={expense.id} expense={expense} onDelete={onDelete} />
+              ))}
+            </AnimatePresence>
+          ) : (
+            <EmptyState
+              icon="receipt"
+              title="No expenses yet"
+              body="Add your first spend and your budget story starts here."
+            />
+          )}
+        </section>
+      );
+    }
+
+    function EmptyState({ icon, title, body, action }) {
+      return (
+        <div className="empty-state">
+          <div>
+            <div className="icon-chip mx-auto mb-4" style={{ color: "#C4B5FD" }}>
+              <Icon name={icon} size={24} />
+            </div>
+            <h3 className="heading-font font-extrabold text-lg">{title}</h3>
+            <p className="muted text-sm leading-5 mt-2">{body}</p>
+            {action}
+          </div>
+        </div>
+      );
+    }
+
+    function AchievementRail({ stats }) {
+      const achievements = [
+        {
+          title: `${stats.streak} day streak`,
+          body: "Daily spending stayed under pace.",
+          icon: "zap",
+          tone: "#22C55E"
+        },
+        {
+          title: `${stats.noSpendDays} no-spend days`,
+          body: "Free days are doing quiet work.",
+          icon: "sparkles",
+          tone: "#06B6D4"
+        },
+        {
+          title: stats.progress < 70 ? "Budget badge" : "Comeback badge",
+          body: stats.progress < 70 ? "You are ahead of the month." : "One calmer week can reset the month.",
+          icon: "target",
+          tone: "#A78BFA"
+        }
+      ];
+
+      return (
+        <section>
+          <div className="section-head">
+            <h2 className="section-title">Wins</h2>
+          </div>
+          <div className="horizontal-scroll">
+            {achievements.map(item => (
+              <div className="insight-card" key={item.title}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="icon-chip" style={{ width: 38, height: 38, borderRadius: 13, background: `${item.tone}24`, color: item.tone }}>
+                    <Icon name={item.icon} size={20} />
+                  </div>
+                  <div className="font-extrabold">{item.title}</div>
+                </div>
+                <p className="muted text-sm leading-5">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function HomeScreen({ data, stats, onAdd, onDelete, setActiveTab }) {
+      return (
+        <motion.div
+          className="screen-stack"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.28 }}
+        >
+          <AppHeader data={data} stats={stats} />
+          <WalletCard stats={stats} />
+          <MetricGrid stats={stats} />
+          <SmartInsights stats={stats} />
+          <ChartCard title="Monthly spending" subtitle="Last 7 days">
+            <SpendingChart
+              variant="line"
+              labels={stats.last7.map(item => item.label)}
+              values={stats.last7.map(item => item.total)}
+            />
+          </ChartCard>
+          <RecentTransactions
+            expenses={data.expenses}
+            onDelete={onDelete}
+            onViewAll={() => setActiveTab("analytics")}
+          />
+          <AchievementRail stats={stats} />
+        </motion.div>
+      );
+    }
+
+    function AnalyticsScreen({ data, stats, onDelete }) {
+      const activeCategories = stats.categoryTotals.filter(category => category.amount > 0);
+      const chartCategories = activeCategories.length ? activeCategories : stats.categoryTotals.slice(0, 3);
+
+      return (
+        <motion.div
+          className="screen-stack"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.28 }}
+        >
+          <div>
+            <div className="muted text-sm font-bold">Analytics</div>
+            <h1 className="heading-font text-3xl font-extrabold leading-tight mt-1">Where your money goes.</h1>
+          </div>
+
+          <div className="metric-grid">
+            <div className="metric-tile">
+              <span className="metric-label">Top category</span>
+              <span className="metric-value">{stats.topCategory.name}</span>
+            </div>
+            <div className="metric-tile">
+              <span className="metric-label">Peak day</span>
+              <span className="metric-value">{stats.mostExpensiveDay.label}</span>
+            </div>
+            <div className="metric-tile">
+              <span className="metric-label">Daily safe</span>
+              <span className="metric-value">{formatCompactMoney(stats.safeToSpendDaily)}</span>
+            </div>
+          </div>
+
+          <ChartCard title="Category split" subtitle={`${formatMoney(stats.spent)} spent this month`}>
+            <SpendingChart
+              variant="doughnut"
+              labels={chartCategories.map(category => category.name)}
+              values={chartCategories.map(category => category.amount)}
+              colors={chartCategories.map(category => category.color)}
+            />
+          </ChartCard>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Category breakdown</h2>
+            </div>
+            <div className="space-y-3">
+              {stats.categoryTotals.map(category => {
+                const pct = stats.spent > 0 ? (category.amount / stats.spent) * 100 : 0;
+                return (
+                  <div key={category.name}>
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="ib-icon" style={{ color: category.color }}>
+                          <Icon name={category.icon} size={18} />
+                        </span>
+                        <span className="font-extrabold truncate">{category.name}</span>
+                      </div>
+                      <span className="money-font font-extrabold">{formatMoney(category.amount)}</span>
+                    </div>
+                    <div className="progress-track" style={{ height: 8 }}>
+                      <div className="progress-fill" style={{ width: `${Math.max(2, pct)}%`, background: `linear-gradient(90deg, ${category.color}, rgba(248,250,252,0.5))` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <ChartCard title="Weekly pace" subtitle="Spot heavy days before they become habits">
+            <SpendingChart
+              variant="bar"
+              labels={stats.last7.map(item => item.label)}
+              values={stats.last7.map(item => item.total)}
+            />
+          </ChartCard>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">All transactions</h2>
+            </div>
+            {data.expenses.length ? (
+              <AnimatePresence>
+                {[...data.expenses]
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .map(expense => <ExpenseRow key={expense.id} expense={expense} onDelete={onDelete} />)}
+              </AnimatePresence>
+            ) : (
+              <EmptyState icon="receipt" title="Clean slate" body="No spends yet. Add one whenever money leaves your pocket." />
+            )}
+          </section>
+        </motion.div>
+      );
+    }
+
+    function BudgetScreen({ data, setData, stats, session }) {
+      const [budgetDraft, setBudgetDraft] = useState(data.budget);
+      const ringProgress = `${Math.min(100, stats.progress)}%`;
+      const warning = stats.progress > 92
+        ? "You are close to the line. Keep today simple."
+        : stats.progress > 75
+          ? "A little slower this week keeps the month comfortable."
+          : "You have breathing room. Keep the pace.";
+
+      const saveBudget = async () => {
+        const nextBudget = Math.max(1000, Number(budgetDraft) || data.budget);
+        setData(prev => ({ ...prev, budget: nextBudget }));
+
+        if (session) {
+          try {
+            await apiRequest("/budgets", {
+              method: "POST",
+              body: {
+                monthlyLimit: nextBudget,
+                warningThreshold: 80,
+                month: new Date().getMonth() + 1,
+                year: new Date().getFullYear()
+              }
+            }, session);
+          } catch (error) {
+            console.warn("Budget saved locally, backend update failed:", error.message);
+          }
+        }
+      };
+
+      const addToGoal = async goalId => {
+        setData(prev => ({
+          ...prev,
+          savingsGoals: prev.savingsGoals.map(goal => goal.id === goalId
+            ? { ...goal, saved: Math.min(goal.target, goal.saved + 500) }
+            : goal
+          )
+        }));
+
+        if (session && /^[0-9a-fA-F]{24}$/.test(goalId)) {
+          try {
+            await apiRequest(`/goals/${goalId}/contributions`, {
+              method: "POST",
+              body: { amount: 500 }
+            }, session);
+          } catch (error) {
+            console.warn("Goal contribution saved locally, backend update failed:", error.message);
+          }
+        }
+      };
+
+      return (
+        <motion.div
+          className="screen-stack"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.28 }}
+        >
+          <div>
+            <div className="muted text-sm font-bold">Budget goals</div>
+            <h1 className="heading-font text-3xl font-extrabold leading-tight mt-1">Stay within range.</h1>
+          </div>
+
+          <section className="soft-card p-5 text-center">
+            <div className="budget-ring" style={{ "--progress": ringProgress }}>
+              <div className="budget-ring-inner">
+                <div>
+                  <div className="money-font text-3xl font-extrabold">{Math.round(stats.progress)}%</div>
+                  <div className="muted text-xs font-bold mt-1">used</div>
+                </div>
+              </div>
+            </div>
+            <h2 className="heading-font text-xl font-extrabold">{formatMoney(stats.remaining)} left</h2>
+            <p className="muted text-sm leading-5 mt-2">{warning}</p>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Monthly budget</h2>
+            </div>
+            <div className="field">
+              <label>Budget amount</label>
+              <div className="input-shell">
+                <span className="money-font font-bold">INR</span>
+                <input
+                  inputMode="numeric"
+                  value={budgetDraft}
+                  onChange={event => setBudgetDraft(event.target.value)}
+                />
+              </div>
+            </div>
+            <button className="primary-action w-full mt-4" onClick={saveBudget}>
+              Save budget
+            </button>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Savings goals</h2>
+              <span className="muted text-xs font-bold">+500 quick add</span>
+            </div>
+            {data.savingsGoals.map(goal => {
+              const pct = Math.min(100, (goal.saved / goal.target) * 100);
+              return (
+                <div className="goal-row" key={goal.id}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-extrabold">{goal.name}</div>
+                      <div className="muted text-xs font-bold mt-1">{formatMoney(goal.saved)} of {formatMoney(goal.target)}</div>
+                    </div>
+                    <button className="secondary-action" style={{ minHeight: 38, padding: "0 12px" }} onClick={() => addToGoal(goal.id)}>
+                      <Icon name="plus" size={16} />
+                      Add
+                    </button>
+                  </div>
+                  <div className="progress-track mt-3">
+                    <div className="progress-fill" style={{ width: `${Math.max(3, pct)}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Badges</h2>
+            </div>
+            <div className="tag-grid">
+              <span className="choice-tag active"><Icon name="zap" size={16} /> {stats.streak} day streak</span>
+              <span className={`choice-tag ${stats.noSpendDays > 0 ? "active" : ""}`}><Icon name="sparkles" size={16} /> No-spend day</span>
+              <span className={`choice-tag ${stats.progress < 70 ? "active" : ""}`}><Icon name="target" size={16} /> Budget boss</span>
+            </div>
+          </section>
+        </motion.div>
+      );
+    }
+
+    function ProfileScreen({ data, setData, stats, resetDemo, session, onLogout }) {
+      const [profile, setProfile] = useState(data.profile);
+      const storageMode = session ? "Backend live" : SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase ? "Supabase ready" : "Local-first";
+
+      useEffect(() => {
+        setProfile(data.profile);
+      }, [data.profile.name, data.profile.college]);
+
+      const saveProfile = async () => {
+        const initials = (profile.name || "IB")
+          .split(" ")
+          .map(part => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+        setData(prev => ({ ...prev, profile: { ...profile, avatar: initials || "IB" } }));
+
+        if (session) {
+          try {
+            const result = await apiRequest("/users/me", {
+              method: "PATCH",
+              body: {
+                fullName: profile.name,
+                collegeName: profile.college
+              }
+            }, session);
+            setData(prev => ({ ...prev, profile: profileFromUser(result.user) }));
+          } catch (error) {
+            console.warn("Profile saved locally, backend update failed:", error.message);
+          }
+        }
+      };
+
+      const exportData = () => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "infinitybudget-data.json";
+        anchor.click();
+        URL.revokeObjectURL(url);
+      };
+
+      return (
+        <motion.div
+          className="screen-stack"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.28 }}
+        >
+          <div>
+            <div className="muted text-sm font-bold">Profile</div>
+            <h1 className="heading-font text-3xl font-extrabold leading-tight mt-1">Your money vibe.</h1>
+          </div>
+
+          <section className="soft-card p-5">
+            <div className="flex items-center gap-4">
+              <div className="profile-avatar">{data.profile.avatar || "IB"}</div>
+              <div className="min-w-0">
+                <h2 className="heading-font text-2xl font-extrabold truncate">{data.profile.name}</h2>
+                <p className="muted text-sm font-bold truncate">{data.profile.college}</p>
+                <span className="pill success mt-3"><span className="status-dot" /> {storageMode}</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Details</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="field">
+                <label>Name</label>
+                <div className="input-shell">
+                  <input value={profile.name || ""} onChange={event => setProfile({ ...profile, name: event.target.value })} />
+                </div>
+              </div>
+              <div className="field">
+                <label>College</label>
+                <div className="input-shell">
+                  <input value={profile.college || ""} onChange={event => setProfile({ ...profile, college: event.target.value })} />
+                </div>
+              </div>
+              <button className="primary-action w-full" onClick={saveProfile}>Save profile</button>
+            </div>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Month summary</h2>
+            </div>
+            <div className="metric-grid">
+              <div className="metric-tile">
+                <span className="metric-label">Spent</span>
+                <CountUp value={stats.spent} className="metric-value" />
+              </div>
+              <div className="metric-tile">
+                <span className="metric-label">Left</span>
+                <CountUp value={stats.remaining} className="metric-value" />
+              </div>
+              <div className="metric-tile">
+                <span className="metric-label">Entries</span>
+                <span className="metric-value">{data.expenses.length}</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Focus</h2>
+            </div>
+            <div className="tag-grid mb-4">
+              {data.habits.map(habit => <span className="choice-tag active" key={habit}>{habit}</span>)}
+              {!data.habits.length && <span className="muted text-sm">No habits selected.</span>}
+            </div>
+            <div className="tag-grid">
+              {data.goals.map(goal => <span className="choice-tag active" key={goal}><Icon name="target" size={16} /> {goal}</span>)}
+              {!data.goals.length && <span className="muted text-sm">No goals selected.</span>}
+            </div>
+          </section>
+
+          <section className="soft-card p-4">
+            <div className="section-head">
+              <h2 className="section-title">Data</h2>
+            </div>
+            <div className="split-actions">
+              <button className="secondary-action" onClick={exportData}>
+                <Icon name="download" size={18} />
+                Export
+              </button>
+              <button className="secondary-action" onClick={resetDemo}>
+                <Icon name="settings" size={18} />
+                Reset demo
+              </button>
+            </div>
+            <button className="secondary-action w-full mt-3" onClick={onLogout}>
+              Logout
+            </button>
+          </section>
+        </motion.div>
+      );
+    }
+
+    function BottomNav({ activeTab, setActiveTab }) {
+      return (
+        <nav className="bottom-nav" aria-label="Primary navigation">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              className={`nav-item ${activeTab === item.id ? "active" : ""}`}
+              onClick={() => setActiveTab(item.id)}
+              aria-label={item.label}
+            >
+              <Icon name={item.icon} size={21} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      );
+    }
+
+    function AddExpenseModal({ open, onClose, onAdd }) {
+      const [draft, setDraft] = useState({
+        amount: "",
+        category: "Food",
+        note: "",
+        date: toLocalISO()
+      });
+      const amountRef = useRef(null);
+
+      useEffect(() => {
+        if (open) {
+          setDraft({ amount: "", category: "Food", note: "", date: toLocalISO() });
+          setTimeout(() => amountRef.current?.focus(), 260);
+        }
+      }, [open]);
+
+      const amount = Number(draft.amount);
+      const canSave = amount > 0 && draft.category && draft.date;
+
+      const submit = event => {
+        event.preventDefault();
+        if (!canSave) return;
+        onAdd({
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          amount,
+          category: draft.category,
+          note: draft.note.trim() || draft.category,
+          date: draft.date
+        });
+        onClose();
+      };
+
+      return (
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              className="modal-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onMouseDown={event => {
+                if (event.target === event.currentTarget) onClose();
+              }}
+            >
+              <motion.form
+                className="modal-sheet"
+                initial={{ y: 80, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 80, opacity: 0 }}
+                transition={{ type: "spring", damping: 26, stiffness: 260 }}
+                onSubmit={submit}
+              >
+                <div className="drag-handle" />
+                <div className="flex items-start justify-between gap-4 mb-5">
+                  <div>
+                    <div className="muted text-sm font-bold">Quick add</div>
+                    <h2 className="heading-font text-2xl font-extrabold mt-1">What did you spend?</h2>
+                  </div>
+                  <button type="button" className="secondary-action" style={{ width: 44, minHeight: 44 }} onClick={onClose} aria-label="Close">
+                    x
+                  </button>
+                </div>
+
+                <div className="field mb-4">
+                  <label>Amount</label>
+                  <div className="input-shell" style={{ minHeight: 74 }}>
+                    <span className="money-font text-2xl font-extrabold">INR</span>
+                    <input
+                      ref={amountRef}
+                      className="amount-input"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={draft.amount}
+                      onChange={event => setDraft({ ...draft, amount: event.target.value.replace(/[^\d.]/g, "") })}
+                    />
+                  </div>
+                </div>
+
+                <div className="field mb-4">
+                  <label>Category</label>
+                  <div className="category-grid">
+                    {categoryConfig.map(category => (
+                      <button
+                        type="button"
+                        key={category.name}
+                        className={`category-chip ${draft.category === category.name ? "active" : ""}`}
+                        onClick={() => setDraft({ ...draft, category: category.name })}
+                      >
+                        <span className="icon-chip" style={{ width: 32, height: 32, borderRadius: 11, background: category.soft, color: category.color }}>
+                          <Icon name={category.icon} size={17} />
+                        </span>
+                        <span className="font-extrabold text-sm">{category.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="field mb-4">
+                  <label>Note</label>
+                  <div className="input-shell">
+                    <input
+                      placeholder="Campus cafe, metro, split dinner..."
+                      value={draft.note}
+                      onChange={event => setDraft({ ...draft, note: event.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="field mb-5">
+                  <label>Date</label>
+                  <div className="input-shell">
+                    <Icon name="calendar" size={18} className="muted" />
+                    <input
+                      type="date"
+                      value={draft.date}
+                      onChange={event => setDraft({ ...draft, date: event.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="primary-action w-full" disabled={!canSave}>
+                  <Icon name="plus" size={19} />
+                  Add expense
+                </button>
+              </motion.form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      );
+    }
+
+    function MainApp({ data, setData, session, onLogout }) {
+      const [activeTab, setActiveTab] = useState("home");
+      const [modalOpen, setModalOpen] = useState(false);
+      const [success, setSuccess] = useState(false);
+      const stats = useMemo(() => getStats(data), [data]);
+
+      const addExpense = async expense => {
+        let savedExpense = expense;
+
+        if (session) {
+          try {
+            const result = await apiRequest("/expenses", {
+              method: "POST",
+              body: {
+                amount: expense.amount,
+                category: expense.category,
+                note: expense.note,
+                expenseDate: expense.date,
+                paymentMethod: "UPI"
+              }
+            }, session);
+            savedExpense = mapRemoteExpense(result.expense);
+          } catch (error) {
+            console.warn("Expense saved locally, backend create failed:", error.message);
+          }
+        }
+
+        setData(prev => ({ ...prev, expenses: [savedExpense, ...prev.expenses] }));
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 1100);
+      };
+
+      const deleteExpense = async id => {
+        setData(prev => ({ ...prev, expenses: prev.expenses.filter(expense => expense.id !== id) }));
+
+        if (session && /^[0-9a-fA-F]{24}$/.test(id)) {
+          try {
+            await apiRequest(`/expenses/${id}`, { method: "DELETE" }, session);
+          } catch (error) {
+            console.warn("Expense deleted locally, backend delete failed:", error.message);
+          }
+        }
+      };
+
+      const resetDemo = () => {
+        const fresh = createInitialData();
+        setData({ ...fresh, onboardingDone: true });
+        setActiveTab("home");
+      };
+
+      const screens = {
+        home: <HomeScreen data={data} stats={stats} onAdd={() => setModalOpen(true)} onDelete={deleteExpense} setActiveTab={setActiveTab} />,
+        analytics: <AnalyticsScreen data={data} stats={stats} onDelete={deleteExpense} />,
+        budget: <BudgetScreen data={data} setData={setData} stats={stats} session={session} />,
+        profile: <ProfileScreen data={data} setData={setData} stats={stats} resetDemo={resetDemo} session={session} onLogout={onLogout} />
+      };
+
+      return (
+        <div className="app-stage">
+          <div className="app-shell">
+            <main className="screen">
+              <AnimatePresence mode="wait">
+                <React.Fragment key={activeTab}>{screens[activeTab]}</React.Fragment>
+              </AnimatePresence>
+            </main>
+
+            <motion.button
+              className="fab"
+              onClick={() => setModalOpen(true)}
+              aria-label="Add expense"
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Icon name="plus" size={28} stroke={2.6} />
+            </motion.button>
+
+            <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            <AnimatePresence>
+              {success && (
+                <motion.div
+                  className="success-toast"
+                  initial={{ opacity: 0, y: 18, x: "-50%" }}
+                  animate={{ opacity: 1, y: 0, x: "-50%" }}
+                  exit={{ opacity: 0, y: 18, x: "-50%" }}
+                >
+                  <Icon name="check" size={18} />
+                  Expense saved
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <AddExpenseModal open={modalOpen} onClose={() => setModalOpen(false)} onAdd={addExpense} />
+        </div>
+      );
+    }
+
+    function App() {
+      const [data, setData] = usePersistentData();
+      const [session, setSession] = useState(loadSession);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 650);
+        return () => clearTimeout(timer);
+      }, []);
+
+      useEffect(() => {
+        let cancelled = false;
+
+        async function hydrateFromBackend() {
+          if (!session) return;
+
+          try {
+            const remoteData = await fetchBackendData(session, data);
+            if (!cancelled) {
+              setData(remoteData);
+            }
+          } catch (error) {
+            console.warn("Backend sync failed:", error.message);
+          }
+        }
+
+        hydrateFromBackend();
+        return () => {
+          cancelled = true;
+        };
+      }, [session?.tokens?.accessToken]);
+
+      const handleAuth = sessionPayload => {
+        setSession(sessionPayload);
+        setData(prev => ({
+          ...prev,
+          onboardingDone: Boolean(sessionPayload.user?.onboardingCompleted),
+          profile: profileFromUser(sessionPayload.user)
+        }));
+      };
+
+      const handleLogout = () => {
+        saveSession(null);
+        setSession(null);
+        setData(createInitialData());
+      };
+
+      if (loading) return <LoadingScreen />;
+      if (!session) return <AuthScreen onAuth={handleAuth} />;
+      if (!data.onboardingDone) return <Onboarding data={data} setData={setData} session={session} />;
+      return <MainApp data={data} setData={setData} session={session} onLogout={handleLogout} />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

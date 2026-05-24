@@ -1,25 +1,11 @@
-# InfinityBudget API
+# InfinityBudget
 
-Production-ready Node.js, Express, MongoDB Atlas backend for the InfinityBudget student finance app.
+Deploy-ready Node.js, Express, MongoDB Atlas app for InfinityBudget.
 
-## What It Includes
-
-- JWT access tokens and refresh-token rotation
-- Google OAuth ID-token login for mobile/web clients
-- Password hashing with bcrypt
-- Protected REST routes
-- MongoDB Atlas schemas with Mongoose indexes
-- Expenses with filtering, search, pagination, and date ranges
-- Budget tracking with remaining amount and warnings
-- Savings goals with progress/completion detection
-- Achievement unlock system
-- Analytics aggregation pipelines
-- Security middleware: Helmet, CORS, rate limits, HPP, Mongo sanitize
-- Render and Railway deployment files
-
-## Folder Structure
+## Project Structure
 
 ```txt
+server.js
 src/
   app.js
   server.js
@@ -31,22 +17,75 @@ src/
   services/
   utils/
   validators/
+scripts/
+infinitybudget.html
+package.json
+package-lock.json
+render.yaml
+railway.json
+Procfile
 ```
 
-## Setup
+## Local Setup
 
 ```bash
-cd backend
 npm install
 cp .env.example .env
 npm run dev
 ```
 
-Set `MONGODB_URI`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, and `GOOGLE_CLIENT_ID` in `.env`.
+Set `MONGODB_URI`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, and optional `GOOGLE_CLIENT_ID` in `.env`.
 
-## Core Routes
+## Production Environment Variables
+
+Required:
 
 ```txt
+MONGODB_URI
+JWT_ACCESS_SECRET
+JWT_REFRESH_SECRET
+```
+
+Optional:
+
+```txt
+GOOGLE_CLIENT_ID
+CLIENT_URL
+API_BASE_URL
+DNS_SERVERS
+JWT_ACCESS_EXPIRES_IN
+JWT_REFRESH_EXPIRES_IN
+RATE_LIMIT_WINDOW_MS
+RATE_LIMIT_MAX
+AUTH_RATE_LIMIT_MAX
+LOG_LEVEL
+```
+
+## Deployment
+
+### Render
+
+Use `render.yaml`, or create a Web Service with:
+
+```txt
+Build command: npm install && npm run check
+Start command: npm start
+Health check path: /api/health
+```
+
+### Railway
+
+Railway can use `railway.json`.
+
+```txt
+Start command: npm start
+Health check path: /api/health
+```
+
+## Routes
+
+```txt
+GET    /
 GET    /api/health
 
 POST   /api/auth/register
@@ -93,53 +132,3 @@ POST   /api/analytics/snapshots
 GET    /api/achievements
 POST   /api/achievements/recalculate
 ```
-
-All routes except `/api/health` and `/api/auth/*` require:
-
-```txt
-Authorization: Bearer <accessToken>
-```
-
-## Expense Query Examples
-
-```txt
-GET /api/expenses?page=1&limit=20&category=Food
-GET /api/expenses?startDate=2026-05-01&endDate=2026-05-31
-GET /api/expenses?search=cafe&sort=amount_desc
-```
-
-## MongoDB Collections
-
-- `users`
-- `expenses`
-- `budgets`
-- `goals`
-- `achievements`
-- `analyticssnapshots`
-- `refreshtokens`
-
-`refreshtokens` is an internal security collection used for refresh-token rotation and revocation.
-
-## Deployment Notes
-
-### Render
-
-Use `render.yaml`, or create a Web Service:
-
-- Build command: `npm install`
-- Start command: `npm start`
-- Health check path: `/api/health`
-
-### Railway
-
-Railway can use `railway.json`. Add the same environment variables from `.env.example`.
-
-## Future-Ready Hooks
-
-The service layer is designed for future additions:
-
-- AI spending coach service under `src/services/ai.service.js`
-- Notification service for budget alerts
-- WebSocket or SSE gateway for live sync
-- Shared wallets and friend groups
-- Premium plans and payment integration

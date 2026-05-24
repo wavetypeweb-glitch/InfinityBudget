@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "build": "npm run check",
     "lint": "node --check server.js && node --check src/server.js && node --check src/app.js",
     "check": "node scripts/check-syntax.js"
   },

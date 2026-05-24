@@ -1,0 +1,4 @@
+InfinityBudget API running on port 5001
+[0mGET / [32m200[0m 51.786 ms - 99262[0m
+[0mGET /infinitybudget.html [32m200[0m 3.068 ms - 99262[0m
+[0mGET /api/health [32m200[0m 6.381 ms - 129[0m

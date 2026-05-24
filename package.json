@@ -1,12 +1,12 @@
 {
-  "name": "infinitybudget-backend",
+  "name": "infinitybudget",
   "version": "1.0.0",
-  "description": "Production-ready API backend for InfinityBudget student finance app.",
-  "main": "src/server.js",
+  "description": "Deployable InfinityBudget web app and API.",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "lint": "node --check src/server.js && node --check src/app.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "lint": "node --check server.js && node --check src/server.js && node --check src/app.js",
     "check": "node scripts/check-syntax.js"
   },
   "engines": {

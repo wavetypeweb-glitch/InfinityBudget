@@ -1,8 +1,10 @@
 const { execFileSync } = require("child_process");
 const { readdirSync, statSync } = require("fs");
-const { join } = require("path");
+const { join, resolve } = require("path");
 
-const root = join(__dirname, "..", "src");
+const root = resolve(__dirname, "..");
+const scanDirs = ["src", "scripts"].map((dir) => join(root, dir));
+const topLevelFiles = ["server.js"].map((file) => join(root, file));
 
 function collectJsFiles(dir) {
   return readdirSync(dir).flatMap((entry) => {
@@ -17,7 +19,10 @@ function collectJsFiles(dir) {
   });
 }
 
-const files = collectJsFiles(root);
+const files = [
+  ...topLevelFiles,
+  ...scanDirs.flatMap(collectJsFiles)
+];
 
 for (const file of files) {
   execFileSync(process.execPath, ["--check", file], { stdio: "inherit" });

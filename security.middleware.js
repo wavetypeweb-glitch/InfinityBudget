@@ -12,20 +12,23 @@ function securityMiddleware(app) {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
 
-  app.use(helmet());
-  app.use(cors({
-    origin(origin, callback) {
-      const isLocalDevOrigin = !config.isProduction && (
-        origin === "null" ||
-        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || "")
-      );
+  app.use(helmet({
+    contentSecurityPolicy: false
+  }));
+  app.use(cors((req, callback) => {
+    const origin = req.header("Origin");
+    const requestOrigin = `${req.protocol}://${req.get("host")}`;
+    const isSameOrigin = origin === requestOrigin;
+    const isLocalDevOrigin = !config.isProduction && (
+      origin === "null" ||
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || "")
+    );
+    const isAllowedOrigin = !origin || isSameOrigin || isLocalDevOrigin || config.clientUrls.includes(origin);
 
-      if (!origin || isLocalDevOrigin || config.clientUrls.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Origin not allowed by CORS"));
-    },
-    credentials: true
+    callback(null, {
+      origin: isAllowedOrigin,
+      credentials: true
+    });
   }));
   app.use(compression());
   app.use(express.json({ limit: "1mb" }));

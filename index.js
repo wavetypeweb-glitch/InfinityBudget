@@ -1,10 +1,19 @@
 const router = require("express").Router();
+const mongoose = require("mongoose");
+
+const databaseStates = {
+  0: "disconnected",
+  1: "connected",
+  2: "connecting",
+  3: "disconnecting"
+};
 
 router.get("/health", (req, res) => {
   res.json({
     success: true,
     service: "InfinityBudget API",
     status: "healthy",
+    database: databaseStates[mongoose.connection.readyState] || "unknown",
     timestamp: new Date().toISOString()
   });
 });

@@ -68,9 +68,42 @@ LOG_LEVEL
 Use `render.yaml`, or create a Web Service with:
 
 ```txt
-Build command: npm install && npm run check
+Build command: npm ci && npm run check
 Start command: npm start
 Health check path: /api/health
+```
+
+Required Render environment variable:
+
+```txt
+MONGODB_URI
+```
+
+The blueprint generates `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` automatically. If you create the service manually instead of using the blueprint, add both JWT secrets yourself.
+
+### GitHub Upload Checklist
+
+Upload these files and folders to GitHub:
+
+```txt
+.gitignore
+.env.example
+README.md
+package.json
+package-lock.json
+render.yaml
+server.js
+infinitybudget.html
+scripts/
+src/
+```
+
+Do not upload:
+
+```txt
+.env
+node_modules/
+*.log
 ```
 
 ### Railway
